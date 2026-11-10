@@ -56,12 +56,22 @@
             return url;
         };
 
-        // Helper specifically for streaming Google Drive Video/Audio
-        const getDriveStreamUrl = (url) => {
+        // Helper specifically for native audio/video playback streams from Google Drive
+        const getDriveMediaStreamUrl = (url) => {
             if (!url) return '';
             const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
             if (fileIdMatch && fileIdMatch[1]) {
-                return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview?autoplay=1`;
+                return `https://docs.google.com/uc?export=open&id=${fileIdMatch[1]}`;
+            }
+            return url;
+        };
+
+        // Helper for Google Drive Video Stream Iframe without Autoplay
+        const getDriveIframeStreamUrl = (url) => {
+            if (!url) return '';
+            const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+            if (fileIdMatch && fileIdMatch[1]) {
+                return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
             }
             return url;
         };
@@ -646,58 +656,60 @@
 
                     {/* ENVELOPE MODAL POPUP */}
                     {selectedEnvelope && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-                            <div className="bg-amber-950 border-2 border-yellow-500/60 p-6 md:p-8 rounded-3xl max-w-lg w-full space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+                            <div className="bg-amber-950 border-2 border-yellow-500/60 p-4 md:p-8 rounded-3xl max-w-lg w-full space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
                                 <button 
                                     onClick={() => setSelectedEnvelope(null)}
-                                    className="absolute top-4 right-4 text-yellow-400 hover:text-white font-black text-lg bg-amber-900/80 px-3 py-1 rounded-full border border-yellow-500/30"
+                                    className="absolute top-3 right-3 text-yellow-400 hover:text-white font-black text-sm bg-amber-900/80 px-3 py-1 rounded-full border border-yellow-500/30 z-20"
                                 >
                                     ✕
                                 </button>
 
                                 <div className="text-center space-y-1">
-                                    <span className="text-xs font-bold text-yellow-400 uppercase tracking-widest bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">
+                                    <span className="text-[10px] md:text-xs font-bold text-yellow-400 uppercase tracking-widest bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">
                                         {selectedEnvelope.title}
                                     </span>
-                                    <h3 className="text-xl font-bold text-white pt-2">{selectedEnvelope.subTitle}</h3>
+                                    <h3 className="text-lg md:text-xl font-bold text-white pt-2">{selectedEnvelope.subTitle}</h3>
                                 </div>
 
-                                <p className="text-amber-100 text-sm bg-amber-900/60 p-4 rounded-2xl border border-yellow-500/30 text-center font-medium leading-relaxed">
+                                <p className="text-amber-100 text-xs md:text-sm bg-amber-900/60 p-3 md:p-4 rounded-2xl border border-yellow-500/30 text-center font-medium leading-relaxed">
                                     "{selectedEnvelope.text}"
                                 </p>
 
-                                {/* Photo Attachment */}
+                                {/* Responsive Photo Attachment */}
                                 {selectedEnvelope.photo && (
-                                    <div className="rounded-2xl overflow-hidden border border-yellow-500/40 max-h-64 bg-black">
+                                    <div className="rounded-2xl overflow-hidden border border-yellow-500/40 bg-black max-h-60 sm:max-h-80 w-full flex items-center justify-center">
                                         <img 
                                             src={getDriveDirectUrl(selectedEnvelope.photo)} 
                                             alt={selectedEnvelope.title} 
-                                            className="w-full h-full object-cover"
+                                            className="w-full h-full object-contain max-h-60 sm:max-h-80"
                                         />
                                     </div>
                                 )}
 
-                                {/* Single Video Stream Attachment */}
+                                {/* Birthday Video Stream Attachment */}
                                 {selectedEnvelope.video && (
-                                    <div className="rounded-2xl overflow-hidden border border-yellow-500/40 bg-black aspect-video">
+                                    <div className="rounded-2xl overflow-hidden border border-yellow-500/40 bg-black aspect-video w-full">
                                         <iframe 
-                                            src={getDriveStreamUrl(selectedEnvelope.video)} 
+                                            src={getDriveIframeStreamUrl(selectedEnvelope.video)} 
                                             className="w-full h-full border-0" 
-                                            allow="autoplay"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
                                         />
                                     </div>
                                 )}
 
-                                {/* Multiple Videos (Sweet Dreams) */}
+                                {/* Multiple Videos (Sweet Dreams) with Manual Play/Pause controls, NO Autoplay */}
                                 {selectedEnvelope.videos && (
-                                    <div className="space-y-3">
-                                        <span className="text-xs font-bold text-yellow-400 block">🌙 Sweet Dreams Videos:</span>
+                                    <div className="space-y-4">
+                                        <span className="text-xs font-bold text-yellow-400 block text-center">🌙 Sweet Dreams Video Clips (Tap Play to Watch)</span>
                                         {selectedEnvelope.videos.map((vidUrl, vIdx) => (
-                                            <div key={vIdx} className="rounded-2xl overflow-hidden border border-yellow-500/30 bg-black aspect-video">
+                                            <div key={vIdx} className="rounded-2xl overflow-hidden border border-yellow-500/40 bg-black aspect-video w-full relative shadow-md">
                                                 <iframe 
-                                                    src={getDriveStreamUrl(vidUrl)} 
+                                                    src={getDriveIframeStreamUrl(vidUrl)} 
                                                     className="w-full h-full border-0" 
-                                                    allow="autoplay"
+                                                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                    allowFullScreen
                                                 />
                                             </div>
                                         ))}
@@ -706,13 +718,13 @@
 
                                 {/* Audio Stream Attachment */}
                                 {selectedEnvelope.audio && (
-                                    <div className="bg-amber-900/90 border border-yellow-500/30 p-4 rounded-2xl space-y-2">
+                                    <div className="bg-amber-900/90 border border-yellow-500/30 p-3 md:p-4 rounded-2xl space-y-2">
                                         <span className="text-xs font-bold text-yellow-400 block">🎵 Special Audio Message</span>
                                         <audio 
                                             controls 
                                             autoPlay 
-                                            src={getDriveDirectUrl(selectedEnvelope.audio)} 
-                                            className="w-full h-8" 
+                                            src={getDriveMediaStreamUrl(selectedEnvelope.audio)} 
+                                            className="w-full h-9" 
                                         />
                                     </div>
                                 )}
@@ -782,22 +794,23 @@
                     {/* TAB 6: PLAYLIST & VOICE NOTES */}
                     {activeTab === 'music' && (
                         <div className="space-y-6 animate-fadeIn">
-                            <div className="bg-amber-900/60 p-6 rounded-3xl border border-yellow-500/30">
-                                <h2 className="text-2xl font-bold text-white">Chuti & Ravindu's Romantic Playlist 🎧</h2>
+                            <div className="bg-amber-900/60 p-5 rounded-3xl border border-yellow-500/30">
+                                <h2 className="text-xl md:text-2xl font-bold text-white">Chuti & Ravindu's Romantic Playlist 🎧</h2>
                                 <p className="text-amber-200 text-xs">Special tracks & voice notes recorded for you 🌻</p>
                             </div>
 
                             <div className="space-y-3">
                                 {userPlaylist.map((track) => (
-                                    <div key={track.id} className="bg-amber-950/90 border border-yellow-500/30 p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg">
+                                    <div key={track.id} className="bg-amber-950/90 border border-yellow-500/30 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
                                         <div className="space-y-1">
-                                            <h4 className="text-sm font-bold text-white">{track.title}</h4>
-                                            <p className="text-xs text-yellow-400/80">{track.artist}</p>
+                                            <h4 className="text-xs md:text-sm font-bold text-white">{track.title}</h4>
+                                            <p className="text-[11px] text-yellow-400/80">{track.artist}</p>
                                         </div>
                                         <audio 
                                             controls 
-                                            src={getDriveDirectUrl(track.audioUrl)} 
-                                            className="w-full md:w-64 h-8" 
+                                            preload="metadata"
+                                            src={getDriveMediaStreamUrl(track.audioUrl)} 
+                                            className="w-full sm:w-64 h-9" 
                                         />
                                     </div>
                                 ))}

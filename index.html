@@ -46,12 +46,22 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // Helper to get direct Google Drive image / audio URL
+        // Helper to get direct Google Drive image / audio / video URLs
         const getDriveDirectUrl = (url) => {
             if (!url) return '';
             const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
             if (fileIdMatch && fileIdMatch[1]) {
                 return `https://lh3.googleusercontent.com/d/${fileIdMatch[1]}`;
+            }
+            return url;
+        };
+
+        // Helper specifically for streaming Google Drive Video/Audio in an Embed Player
+        const getDriveStreamUrl = (url) => {
+            if (!url) return '';
+            const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+            if (fileIdMatch && fileIdMatch[1]) {
+                return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
             }
             return url;
         };
@@ -305,29 +315,33 @@
                     { 
                         id: 1, 
                         title: 'Open when you miss me 🥺', 
-                        text: 'Whenever distance feels too far, just remember I am always holding your hand in my heart. 💖', 
+                        subTitle: 'When The Distance Feels Too Far...',
+                        text: 'චූටි බබා, මම හැම තිස්සෙම ඔයා ලඟින් ඉන්නවා. දුරින් හිටියත් මගේ මුලු හදවතම තියෙන්නේ ඔයා ලඟ! ❤️', 
                         photo: 'https://drive.google.com/file/d/1yWjDHDQXnlLhcz_-v_i76bJKivQYKzWW/view?usp=drive_link', 
                         audio: 'https://drive.google.com/file/d/1r7V4MhRLVA3rtqBUpVcoqAUg6wgBAHKB/view?usp=drive_link' 
                     },
                     { 
                         id: 2, 
-                        title: 'Open on your Birthday Morning 🎂', 
-                        text: 'Good morning my sunshine! Happy Birthday! Watch this video message created just for your birthday morning! 🌻🎉', 
+                        title: 'Open on Birthday Morning 🎂', 
+                        subTitle: 'Good Morning My Birthday Princess! 🌻',
+                        text: 'සුබ උපන්දිනයක් වේවා මගේ සුන්දර සූරියකාන්ත මලට! 🎂 🌻 අද දවස ඔයාගේ ලස්සනම දවස කරගන්න!', 
                         photo: '', 
                         audio: '',
                         video: 'https://drive.google.com/file/d/18liBWJFxqV_aLjlowoDIzIZHIysOnayy/view?usp=drive_link'
                     },
                     { 
                         id: 3, 
-                        title: 'Open when you feel sad 🌧️', 
-                        text: 'Don\'t be sad my angel. Take a deep breath and listen to this warm message. Ravindu is always here for you! 🤗', 
+                        title: 'Open when you feel sad 🥺', 
+                        subTitle: 'I Am Always Here For You 🤗',
+                        text: 'දුක් වෙන්න එපා මැණික. ඔයාට මම ඉන්නවා හැමදාම. මගේ පැටියා හිනාවෙලා ඉන්නකොට තමා ලස්සනම! ❤️', 
                         photo: 'https://drive.google.com/file/d/11Z5kMOvUngPaVEcHW6y2BVamgGpueGzU/view?usp=drive_link', 
                         audio: 'https://drive.google.com/file/d/1vDaNiPVsto2zTKR6YO6HwGWmq4fRgriC/view?usp=drive_link' 
                     },
                     { 
                         id: 4, 
-                        title: 'Open before going to sleep 🌙 (Sweet Dreams)', 
-                        text: 'Good night my sweet sunflower. Watch these sweet video clips before bed & dream sweet dreams of us! 😴❤️', 
+                        title: 'Open before going to sleep 🌙', 
+                        subTitle: 'Sweet Dreams My Love 😚',
+                        text: 'පරිස්සමින් නිදාගන්න මගේ චූටි බබා. හෙට තවත් ලස්සන දවසක් වේවි. Good Night Ummaaa! 💋', 
                         photo: '', 
                         audio: '',
                         videos: [
@@ -338,6 +352,9 @@
                     }
                 ];
             });
+
+            // Selected Envelope Card for Modal View
+            const [selectedEnvelope, setSelectedEnvelope] = useState(null);
 
             // Quiz State
             const [currentQuizIdx, setCurrentQuizIdx] = useState(0);
@@ -605,49 +622,112 @@
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {openWhenCards.map((c) => (
-                                    <div key={c.id} className="bg-amber-950/80 border border-yellow-500/30 p-6 rounded-3xl space-y-4 shadow-xl">
-                                        <h3 className="text-lg font-bold text-yellow-400">{c.title}</h3>
-                                        
-                                        {c.photo && (
-                                            <div className="rounded-2xl overflow-hidden border border-yellow-500/30 h-48">
-                                                <img src={getDriveDirectUrl(c.photo)} className="w-full h-full object-cover" />
-                                            </div>
-                                        )}
+                                    <div 
+                                        key={c.id} 
+                                        onClick={() => setSelectedEnvelope(c)}
+                                        className="bg-amber-950/90 border border-yellow-500/40 p-6 rounded-3xl space-y-4 shadow-xl hover:border-yellow-400 cursor-pointer transition-all hover:scale-[1.02] relative group"
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-extrabold text-amber-950 bg-yellow-400 px-3 py-1 rounded-full shadow-md">
+                                                {c.title}
+                                            </span>
+                                            <span className="text-2xl group-hover:scale-125 transition-transform">🌻</span>
+                                        </div>
 
-                                        {c.audio && (
-                                            <div className="bg-amber-900/60 p-3 rounded-2xl border border-yellow-500/20 space-y-1">
-                                                <span className="text-[10px] text-yellow-300 font-bold">🎵 Background Song / Audio Note</span>
-                                                <audio controls src={getDriveDirectUrl(c.audio)} className="w-full h-8" />
-                                            </div>
-                                        )}
+                                        <h3 className="text-lg font-bold text-white group-hover:text-yellow-300 transition-colors">
+                                            {c.subTitle}
+                                        </h3>
 
-                                        {c.video && (
-                                            <div className="bg-amber-900/60 p-3 rounded-2xl border border-yellow-500/20 space-y-2">
-                                                <span className="text-[10px] text-yellow-300 font-bold block">🎥 Birthday Video Message</span>
-                                                <video controls src={getDriveDirectUrl(c.video)} className="w-full h-48 rounded-xl object-cover bg-black" />
-                                            </div>
-                                        )}
-
-                                        {c.videos && (
-                                            <div className="bg-amber-900/60 p-4 rounded-2xl border border-yellow-500/20 space-y-3">
-                                                <span className="text-xs text-yellow-300 font-bold block">🎥 Sweet Dreams Video Clips (3 Videos)</span>
-                                                <div className="space-y-3">
-                                                    {c.videos.map((vidUrl, vIdx) => (
-                                                        <div key={vIdx} className="space-y-1">
-                                                            <span className="text-[10px] text-amber-200">Video Clip #{vIdx + 1}</span>
-                                                            <video controls src={getDriveDirectUrl(vidUrl)} className="w-full h-40 rounded-xl object-cover bg-black" />
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <p className="text-xs text-amber-100 bg-amber-900/50 p-4 rounded-2xl border border-yellow-500/10 leading-relaxed font-medium">
+                                        <div className="bg-amber-900/60 p-4 rounded-2xl border border-yellow-500/20 text-xs text-amber-100 font-medium leading-relaxed">
                                             {c.text}
-                                        </p>
+                                        </div>
+
+                                        <div className="flex justify-end">
+                                            <button className="px-4 py-2 bg-yellow-500 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg hover:bg-yellow-400">
+                                                Open Envelope 💌
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
+
+                            {/* POPUP MODAL FOR ENVELOPE CONTENT (AUDIO & VIDEO STREAMING FIX) */}
+                            {selectedEnvelope && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+                                    <div className="bg-amber-950 border border-yellow-500/50 rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                                        <button 
+                                            onClick={() => setSelectedEnvelope(null)}
+                                            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-yellow-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md hover:scale-110"
+                                        >
+                                            ✕
+                                        </button>
+
+                                        <div className="space-y-1 pr-8">
+                                            <span className="text-xs font-bold text-yellow-400 uppercase tracking-widest bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">
+                                                {selectedEnvelope.title}
+                                            </span>
+                                            <h3 className="text-xl font-extrabold text-white pt-2">{selectedEnvelope.subTitle}</h3>
+                                        </div>
+
+                                        <div className="bg-amber-900/60 p-4 rounded-2xl border border-yellow-500/20 text-sm text-amber-100 font-medium leading-relaxed">
+                                            {selectedEnvelope.text}
+                                        </div>
+
+                                        {selectedEnvelope.photo && (
+                                            <div className="rounded-2xl overflow-hidden border border-yellow-500/30 h-64 shadow-md">
+                                                <img src={getDriveDirectUrl(selectedEnvelope.photo)} className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+
+                                        {selectedEnvelope.audio && (
+                                            <div className="bg-amber-900/80 p-4 rounded-2xl border border-yellow-500/30 space-y-2">
+                                                <span className="text-xs text-yellow-400 font-bold block">🎵 Playing Background Voice Note / Music</span>
+                                                <iframe 
+                                                    src={getDriveStreamUrl(selectedEnvelope.audio)} 
+                                                    className="w-full h-20 rounded-xl bg-amber-950 border border-yellow-500/20"
+                                                    allow="autoplay"
+                                                />
+                                            </div>
+                                        )}
+
+                                        {selectedEnvelope.video && (
+                                            <div className="bg-amber-900/80 p-4 rounded-2xl border border-yellow-500/30 space-y-2">
+                                                <span className="text-xs text-yellow-400 font-bold block">🎥 Birthday Morning Video Message</span>
+                                                <iframe 
+                                                    src={getDriveStreamUrl(selectedEnvelope.video)} 
+                                                    className="w-full h-64 rounded-xl bg-black border border-yellow-500/20"
+                                                    allow="autoplay; encrypted-media"
+                                                    allowFullScreen
+                                                />
+                                            </div>
+                                        )}
+
+                                        {selectedEnvelope.videos && (
+                                            <div className="bg-amber-900/80 p-4 rounded-2xl border border-yellow-500/30 space-y-4">
+                                                <span className="text-xs text-yellow-400 font-bold block">🎥 Sweet Dreams Video Clips</span>
+                                                {selectedEnvelope.videos.map((vUrl, vIdx) => (
+                                                    <div key={vIdx} className="space-y-1">
+                                                        <span className="text-[10px] text-amber-200 font-bold">Video Clip #{vIdx + 1}</span>
+                                                        <iframe 
+                                                            src={getDriveStreamUrl(vUrl)} 
+                                                            className="w-full h-56 rounded-xl bg-black border border-yellow-500/20"
+                                                            allow="autoplay; encrypted-media"
+                                                            allowFullScreen
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        <button 
+                                            onClick={() => setSelectedEnvelope(null)}
+                                            className="w-full py-3 bg-yellow-500 text-slate-950 font-extrabold text-xs rounded-2xl shadow-lg hover:bg-yellow-400"
+                                        >
+                                            Close Envelope 💌
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 

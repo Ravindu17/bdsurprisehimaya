@@ -243,7 +243,7 @@
                                             if (pin === "111126") {
                                                 setIsAdminUnlocked(true);
                                                 setIsLockedUntilBirthday(false);
-                                                alert("Admin Access Unlocked 🔓! You can now edit and upload photos.");
+                                                alert("Admin Access Unlocked 🔓! You can now add & upload photos live.");
                                             } else if (pin !== null) {
                                                 alert("Incorrect Passcode!");
                                             }
@@ -257,29 +257,15 @@
                                 </button>
                             </div>
 
-                            {/* ADMIN ONLY: Upload Header Background & Banner Multiple Photos */}
+                            {/* ADMIN ONLY: Live Photo Import Controls */}
                             {isAdminUnlocked && (
                                 <div className="absolute top-4 left-4 z-20 flex flex-wrap gap-2">
-                                    <label className="px-3 py-1.5 rounded-full bg-amber-950/90 hover:bg-amber-900 border border-yellow-500/40 text-xs text-yellow-300 font-bold cursor-pointer shadow-md flex items-center gap-1">
-                                        📷 Admin Set Header Photo
-                                        <input 
-                                            type="file" 
-                                            accept="image/*" 
-                                            onChange={(e) => {
-                                                const file = e.target.files[0];
-                                                if (file) {
-                                                    const reader = new FileReader();
-                                                    reader.onloadend = () => {
-                                                        setHeaderBgImage(reader.result);
-                                                        localStorage.setItem('chuti_header_bg', reader.result);
-                                                        alert("Header Photo Updated Successfully! 🌻");
-                                                    };
-                                                    reader.readAsDataURL(file);
-                                                }
-                                            }} 
-                                            className="hidden" 
-                                        />
-                                    </label>
+                                    <button
+                                        onClick={() => handleAddDriveLink('banner')}
+                                        className="px-3 py-1.5 rounded-full bg-yellow-400 text-slate-950 hover:bg-yellow-300 text-xs font-extrabold shadow-md flex items-center gap-1"
+                                    >
+                                        + Add Photo via Drive Link 🔗
+                                    </button>
                                 </div>
                             )}
 

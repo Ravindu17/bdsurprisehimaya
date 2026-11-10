@@ -61,7 +61,8 @@
             if (!url) return '';
             const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
             if (fileIdMatch && fileIdMatch[1]) {
-                return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview`;
+                // Enabled autoplay=1 for Google Drive preview iframe streaming
+                return `https://drive.google.com/file/d/${fileIdMatch[1]}/preview?autoplay=1`;
             }
             return url;
         };

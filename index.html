@@ -306,97 +306,104 @@
             const [hasUserInteracted, setHasUserInteracted] = useState(false);
 
             const [headerPhotoIdx, setHeaderPhotoIdx] = useState(0);
+            const [subBannerIdx, setSubBannerIdx] = useState(0);
+
+            // Gallery Auto-Play State
+            const [isGalleryAutoPlaying, setIsGalleryAutoPlaying] = useState(false);
+            const [gallerySlideIndex, setGallerySlideIndex] = useState(0);
+
             const galleryAudioRef = useRef(null);
 
-            // Music states with exact drive links
-            const [letterBgMusic, setLetterBgMusic] = useState(() => localStorage.getItem('chuti_letter_music') || 'https://drive.google.com/file/d/1iGSMEvAj4w3I2VtALzP1YntIPWn8g_aM/view?usp=drive_link');
-            const [galleryBgMusic, setGalleryBgMusic] = useState(() => localStorage.getItem('chuti_gallery_music') || 'https://drive.google.com/file/d/1pI-S1Uvq_99Ard6RsY_2VubW9jCXUfFT/view?usp=drive_link');
-            
-            // Updated User Playlist with your 4 direct Drive Links
-            const [userPlaylist, setUserPlaylist] = useState(() => {
-                const saved = localStorage.getItem('chuti_user_playlist');
-                return saved ? JSON.parse(saved) : [
-                    { id: 1, title: 'Letter Love Theme 📜❤️', artist: 'Ravindu & Himaya 🌻', audioUrl: 'https://drive.google.com/file/d/1iGSMEvAj4w3I2VtALzP1YntIPWn8g_aM/view?usp=drive_link' },
-                    { id: 2, title: 'When You Miss Me Track 🥺', artist: 'Ravindu & Himaya 🌻', audioUrl: 'https://drive.google.com/file/d/1r7V4MhRLVA3rtqBUpVcoqAUg6wgBAHKB/view?usp=drive_link' },
-                    { id: 3, title: 'Gallery Background Melody 🖼️', artist: 'Ravindu & Himaya 🌻', audioUrl: 'https://drive.google.com/file/d/1pI-S1Uvq_99Ard6RsY_2VubW9jCXUfFT/view?usp=drive_link' },
-                    { id: 4, title: 'Comforting Sad Moments Track 🌧️', artist: 'Ravindu & Himaya 🌻', audioUrl: 'https://drive.google.com/file/d/1vDaNiPVsto2zTKR6YO6HwGWmq4fRgriC/view?usp=drive_link' }
-                ];
-            });
-
-            // Handle Welcome Button Click to unlock Browser Auto-play Policy
-            const handleEnterSite = () => {
-                setHasEnteredSite(true);
-                setHasUserInteracted(true);
-            };
-
-            // Instant auto-play trigger for Gallery Audio when tab is activated
+            // Auto-rotate sub-banner photo every 5s
             useEffect(() => {
-                if (activeTab === 'gallery' && galleryAudioRef.current) {
-                    galleryAudioRef.current.play().catch(e => console.log("Gallery audio play auto-triggered", e));
+                const subTimer = setInterval(() => {
+                    setSubBannerIdx((prev) => (prev + 1) % DEFAULT_BANNER_PHOTOS.length);
+                }, 5000);
+                return () => clearInterval(subTimer);
+            }, []);
+
+            // Gallery Auto-Play Slideshow timer (3.5 seconds)
+            useEffect(() => {
+                let timer;
+                if (isGalleryAutoPlaying) {
+                    timer = setInterval(() => {
+                        setGallerySlideIndex((prev) => (prev + 1) % DEFAULT_GALLERY_PHOTOS.length);
+                    }, 3500);
                 }
-            }, [activeTab, hasUserInteracted]);
+                return () => clearInterval(timer);
+            }, [isGalleryAutoPlaying]);
 
-            // Open When Envelopes State with final user media
-            const [openWhenCards, setOpenWhenCards] = useState(() => {
-                const saved = localStorage.getItem('chuti_open_when_cards');
-                return saved ? JSON.parse(saved) : [
-                    { 
-                        id: 1, 
-                        title: 'Open when you miss me 🥺', 
-                        subTitle: 'When The Distance Feels Too Far...',
-                        text: 'චූටි බබා, මම හැම තිස්සෙම ඔයා ලඟින් ඉන්නවා. දුරින් හිටියත් මගේ මුලු හදවතම තියෙන්නේ ඔයා ලඟ! ❤️', 
-                        photo: 'https://drive.google.com/file/d/1yWjDHDQXnlLhcz_-v_i76bJKivQYKzWW/view?usp=drive_link', 
-                        audio: 'https://drive.google.com/file/d/1r7V4MhRLVA3rtqBUpVcoqAUg6wgBAHKB/view?usp=drive_link' 
-                    },
-                    { 
-                        id: 2, 
-                        title: 'Open on Birthday Morning 🎂', 
-                        subTitle: 'Good Morning My Birthday Princess! 🌻',
-                        text: 'සුබ උපන්දිනයක් වේවා මගේ සුන්දර සූරියකාන්ත මලට! 🎂 🌻 අද දවස ඔයාගේ ලස්සනම දවස කරගන්න!', 
-                        photo: '', 
-                        audio: '',
-                        video: 'https://drive.google.com/file/d/18liBWJFxqV_aLjlowoDIzIZHIysOnayy/view?usp=drive_link'
-                    },
-                    { 
-                        id: 3, 
-                        title: 'Open when you feel sad 🥺', 
-                        subTitle: 'I Am Always Here For You 🤗',
-                        text: 'දුක් වෙන්න එපා මැණික. ඔයාට මම ඉන්නවා හැමදාම. මගේ පැටියා හිනාවෙලා ඉන්නකොට තමා ලස්සනම! ❤️', 
-                        photo: 'https://drive.google.com/file/d/11Z5kMOvUngPaVEcHW6y2BVamgGpueGzU/view?usp=drive_link', 
-                        audio: 'https://drive.google.com/file/d/1vDaNiPVsto2zTKR6YO6HwGWmq4fRgriC/view?usp=drive_link' 
-                    },
-                    { 
-                        id: 4, 
-                        title: 'Open before going to sleep 🌙', 
-                        subTitle: 'Sweet Dreams My Love 😚',
-                        text: 'පරිස්සමින් නිදාගන්න මගේ චූටි බබා. හෙට තවත් ලස්සන දවසක් වේවි. Good Night Ummaaa! 💋', 
-                        photo: '', 
-                        audio: '',
-                        videos: [
-                            'https://drive.google.com/file/d/1KgTKr3OoXjl3w5T-nWDV-bhvYvKbkQrR/view?usp=drive_link',
-                            'https://drive.google.com/file/d/14lHyR2ivZojVuCww2p7Dl01U-Ot7A_Gl/view?usp=drive_link',
-                            'https://drive.google.com/file/d/1rDKBGw3Lj8tVOKzUne4VEFR4q5bFh7pR/view?usp=drive_link'
-                        ]
-                    }
-                ];
-            });
-
-            // Selected Envelope Card for Modal View
+            // Selected Envelope Modal State
             const [selectedEnvelope, setSelectedEnvelope] = useState(null);
 
-            // Quiz State
+            // Love Quiz Game State
             const [currentQuizIdx, setCurrentQuizIdx] = useState(0);
             const [quizScore, setQuizScore] = useState(0);
             const [quizAnswers, setQuizAnswers] = useState({});
             const [quizFinished, setQuizFinished] = useState(false);
 
-            // Auto slide header background photos every 6 seconds
+            // Music states with exact drive links
+            const [letterBgMusic, setLetterBgMusic] = useState(() => localStorage.getItem('chuti_letter_music') || 'https://drive.google.com/file/d/1iGSMEvAj4w3I2VtALzP1YntIPWn8g_aM/view?usp=drive_link');
+            const [galleryBgMusic, setGalleryBgMusic] = useState(() => localStorage.getItem('chuti_gallery_music') || 'https://drive.google.com/file/d/1pI-S1Uvq_99Ard6RsY_2VubW9jCXUfFT/view?usp=drive_link');
+
+            // Playlist tracks
+            const [userPlaylist, setUserPlaylist] = useState([
+                { id: 1, title: 'Letter Love Theme 📜', artist: 'For Chuti', audioUrl: 'https://drive.google.com/file/d/1iGSMEvAj4w3I2VtALzP1YntIPWn8g_aM/view?usp=drive_link' },
+                { id: 2, title: 'When You Miss Me Track 🥺', artist: 'For Chuti', audioUrl: 'https://drive.google.com/file/d/1r7V4MhRLVA3rtqBUpVcoqAUg6wgBAHKB/view?usp=drive_link' },
+                { id: 3, title: 'Gallery Background Melody 🖼️', artist: 'For Chuti', audioUrl: 'https://drive.google.com/file/d/1pI-S1Uvq_99Ard6RsY_2VubW9jCXUfFT/view?usp=drive_link' },
+                { id: 4, title: 'Comforting Melancholy Track 🌧️', artist: 'For Chuti', audioUrl: 'https://drive.google.com/file/d/1vDaNiPVsto2zTKR6YO6HwGWmq4fRgriC/view?usp=drive_link' }
+            ]);
+
+            // Open When Envelopes Data
+            const openWhenCards = [
+                {
+                    id: 1,
+                    title: 'Open when you miss me 🥺',
+                    subTitle: 'When The Distance Feels Too Far...',
+                    text: 'චූටි බබා, මම හැම තිස්සෙම ඔයා ලඟින් ඉන්නවා. දුරින් හිටියත් මගේ මුලු හදවතම තියෙන්නේ ඔයා ලඟ! ❤️',
+                    photo: 'https://drive.google.com/file/d/1yWjDHDQXnlLhcz_-v_i76bJKivQYKzWW/view?usp=drive_link',
+                    audio: 'https://drive.google.com/file/d/1r7V4MhRLVA3rtqBUpVcoqAUg6wgBAHKB/view?usp=drive_link'
+                },
+                {
+                    id: 2,
+                    title: 'Open on Birthday Morning 🎂',
+                    subTitle: 'Good Morning My Birthday Princess! 🌻',
+                    text: 'සුබ උපන්දිනයක් වේවා මගේ සුන්දර සූරියකාන්ත මලට! 🎂 🌻 අද දවස ඔයාගේ ලස්සනම දවස කරගන්න!',
+                    video: 'https://drive.google.com/file/d/18liBWJFxqV_aLjlowoDIzIZHIysOnayy/view?usp=drive_link'
+                },
+                {
+                    id: 3,
+                    title: 'Open when you feel sad 🌧️',
+                    subTitle: 'I Am Always Here For You 🤗',
+                    text: 'දුක් වෙන්න එපා මැණික. ඔයාට මම ඉන්නවා හැමදාම. මගේ පැටියා හිනාවෙලා ඉන්නකොට තමා ලස්සනම! ❤️',
+                    photo: 'https://drive.google.com/file/d/11Z5kMOvUngPaVEcHW6y2BVamgGpueGzU/view?usp=drive_link',
+                    audio: 'https://drive.google.com/file/d/1vDaNiPVsto2zTKR6YO6HwGWmq4fRgriC/view?usp=drive_link'
+                },
+                {
+                    id: 4,
+                    title: 'Open before going to sleep 🌙',
+                    subTitle: 'Sweet Dreams My Love 😴',
+                    text: 'පරිස්සමින් නිදාගන්න මගේ චූටි බබා. හෙට තවත් ලස්සන දවසක් වේවි. Good Night Ummaaa! 💋',
+                    videos: [
+                        'https://drive.google.com/file/d/1KgTKr3OoXjl3w5T-nWDV-bhvYvKbkQrR/view?usp=drive_link',
+                        'https://drive.google.com/file/d/14lHyR2ivZojVuCww2p7Dl01U-Ot7A_Gl/view?usp=drive_link',
+                        'https://drive.google.com/file/d/1rDKBGw3Lj8tVOKzUne4VEFR4q5bFh7pR/view?usp=drive_link'
+                    ]
+                }
+            ];
+
+            // Landing screen enter handler & audio un-mute permission trigger
+            const handleEnterSite = () => {
+                setHasEnteredSite(true);
+                setHasUserInteracted(true);
+            };
+
+            // Auto slide header background photos every 5 seconds
             useEffect(() => {
-                if (DEFAULT_BANNER_PHOTOS.length === 0) return;
-                const interval = setInterval(() => {
+                const timer = setInterval(() => {
                     setHeaderPhotoIdx((prev) => (prev + 1) % DEFAULT_BANNER_PHOTOS.length);
-                }, 6000);
-                return () => clearInterval(interval);
+                }, 5000);
+                return () => clearInterval(timer);
             }, []);
 
             // Admin unlock toggle logic
@@ -541,6 +548,27 @@
                     {/* TAB 1: SURPRISE HUB */}
                     {activeTab === 'home' && (
                         <div className="space-y-6 animate-fadeIn">
+                            {/* SECONDARY ANIMATED BANNER CAROUSEL */}
+                            <div className="relative rounded-3xl overflow-hidden border border-yellow-500/40 bg-amber-950 h-64 md:h-80 shadow-2xl">
+                                {DEFAULT_BANNER_PHOTOS.map((imgUrl, idx) => (
+                                    <img 
+                                        key={idx}
+                                        src={getDriveDirectUrl(imgUrl)}
+                                        alt={`Sub banner ${idx + 1}`}
+                                        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                                            idx === subBannerIdx ? 'opacity-75 scale-100' : 'opacity-0 scale-105'
+                                        }`}
+                                    />
+                                ))}
+                                <div className="absolute inset-0 bg-gradient-to-t from-amber-950 via-amber-950/40 to-transparent p-6 flex flex-col justify-end">
+                                    <span className="text-yellow-400 text-xs font-bold uppercase tracking-widest bg-yellow-500/20 px-3 py-1 rounded-full w-fit mb-2">
+                                        Special Highlights 🌻
+                                    </span>
+                                    <h3 className="text-xl md:text-2xl font-bold text-white">Chuti & Ravindu Memories</h3>
+                                    <p className="text-amber-200 text-xs pt-1">Photos automatically rotate every 5 seconds!</p>
+                                </div>
+                            </div>
+
                             <div className="bg-amber-900/60 p-6 md:p-8 rounded-3xl border border-yellow-500/40 text-center space-y-4 shadow-xl">
                                 <div className="text-5xl">🌻</div>
                                 <h2 className="text-2xl md:text-3xl font-extrabold text-white">Welcome Himaya (Chuti Baba)! 💖</h2>

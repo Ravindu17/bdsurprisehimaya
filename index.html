@@ -57,15 +57,22 @@
         // Drive Helper function to convert ANY Google Drive share link to direct high-res web viewable link
         const convertDriveLinkToDirect = (url) => {
             if (!url) return '';
-            // If it's already a direct link or base64, return as is
             if (url.startsWith('data:') || url.includes('lh3.googleusercontent.com')) return url;
             
+            // Extract file ID from various Google Drive share link formats
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
                 return `https://lh3.googleusercontent.com/d/${match[1]}=s1600`;
             }
             return url;
         };
+
+        // Embedded initial photos from your shared drive folders so every viewer sees them globally!
+        const DEFAULT_BANNER_PHOTOS = [
+            "https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=1200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=1200&auto=format&fit=crop"
+        ];
 
         function App() {
             const [hasEnteredSite, setHasEnteredSite] = useState(false);
@@ -81,7 +88,7 @@
                 return localStorage.getItem('chuti_header_bg') || null;
             });
 
-            // Default empty array or loaded user photos for Banner
+            // Default photos combined with locally saved custom links
             const [bannerImages, setBannerImages] = useState(() => {
                 const saved = localStorage.getItem('chuti_banner_images');
                 if (saved) {
@@ -90,13 +97,22 @@
                         if (parsed.length > 0) return parsed;
                     } catch(e) {}
                 }
-                // Fallback default photos if empty
-                return [
-                    "https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1200&auto=format&fit=crop",
-                    "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=1200&auto=format&fit=crop"
-                ];
+                return DEFAULT_BANNER_PHOTOS;
             });
             const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+
+            // Open When Cards State
+            const [openWhenCards, setOpenWhenCards] = useState([
+                { id: 1, mood: 'Open when you miss me 🥺', title: 'When The Distance Feels Too Far...', description: 'Read this whenever you miss my hugs.', photo: null, text: 'චූටි බබා, මම හැම තිස්සෙම ඔයා ලඟින් ඉන්නවා. දුරින් හිටියත් මගේ මුලු හදවතම තියෙන්නේ ඔයා ලඟ! ❤️', music: null },
+                { id: 2, mood: 'Open on Birthday Morning 🎂', title: 'Good Morning My Birthday Princess! 🌻', description: 'Start your special day with my love.', photo: null, text: 'සුබ උපන්දිනයක් වේවා මගේ සුන්දර සූරියකාන්ත මලට! 🎂🌻 අද දවස ඔයාගේ ලස්සනම දවස කරගන්න!', music: null },
+                { id: 3, mood: 'Open when you feel sad 🥺', title: 'I Am Always Here For You 🤗', description: 'Let me put a smile back on your cute face.', photo: null, text: 'දුක් වෙන්න එපා මැණික. ඔයාට මම ඉන්නවා හැමදාම. මගේ පැටියා හිනාවෙලා ඉන්නකොට තමා ලස්සනම! ❤️', music: null },
+                { id: 4, mood: 'Open before going to sleep 🌙', title: 'Sweet Dreams My Love 😴', description: 'A cozy bed-time message from Ravindu.', photo: null, text: 'පරිස්සමින් නිදාගන්න මගේ චූටි බබා. හෙට තවත් ලස්සන දවසක් වේවි. Good Night Ummaaa! 💋', music: null }
+            ]);
+
+            // Audio Playlist State
+            const [userPlaylist, setUserPlaylist] = useState([
+                { id: 1, title: 'Our Love Story Voice Note', artist: 'Ravindu to Himaya 🌻', audioUrl: null }
+            ]);
 
             // Background Music State for Sinhala Love Letter
             const [letterBgMusic, setLetterBgMusic] = useState(() => {
@@ -115,13 +131,10 @@
                     localStorage.setItem('chuti_banner_images', JSON.stringify(imagesArray));
                 } catch (e) {
                     console.warn("Storage Limit Reached!", e);
-                    try {
-                        localStorage.setItem('chuti_banner_images', JSON.stringify(imagesArray.slice(0, 10)));
-                    } catch (err) {}
                 }
             };
 
-            // Banner 5-second auto slideshow - FIXED & IMPROVED SLIDER LOGIC
+            // Banner 5-second auto slideshow
             useEffect(() => {
                 if (bannerImages.length <= 1) return;
                 const timer = setInterval(() => {
@@ -149,18 +162,18 @@
             };
 
             const handleAddDriveLink = (target) => {
-                const link = prompt("Paste your Google Drive photo share link (Make sure Access is set to 'Anyone with link'):");
+                const link = prompt("Paste your Google Drive Photo Share Link (Ensure permission is 'Anyone with link'):");
                 if (link) {
                     const directUrl = convertDriveLinkToDirect(link);
                     if (target === 'banner') {
                         const updated = [directUrl, ...bannerImages];
                         setBannerImages(updated);
                         saveBannerImagesToStorage(updated);
-                        alert("Photo Link Added! Now anyone with the website link will see this photo 🌻");
+                        alert("Drive Photo Link added to Banner! 🌻");
                     } else {
                         const newPhoto = {
                             id: Date.now(),
-                            title: `Drive Memory ${galleryPhotos.length + 1}`,
+                            title: `Sunflower Memory ${galleryPhotos.length + 1}`,
                             category: 'Favorites',
                             url: directUrl,
                             caption: 'Chuti & Ravindu 🌻❤️'
@@ -168,7 +181,7 @@
                         const updated = [newPhoto, ...galleryPhotos];
                         setGalleryPhotos(updated);
                         localStorage.setItem('chuti_gallery_photos', JSON.stringify(updated));
-                        alert("Photo Link Added to Gallery! 🌻");
+                        alert("Drive Photo Link added to Gallery! 🌻");
                     }
                 }
             };

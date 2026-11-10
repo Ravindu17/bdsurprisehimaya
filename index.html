@@ -298,29 +298,33 @@
             const [headerPhotoIdx, setHeaderPhotoIdx] = useState(0);
             const galleryAudioRef = useRef(null);
 
+            // Music states with exact drive links
+            const [letterBgMusic, setLetterBgMusic] = useState(() => localStorage.getItem('chuti_letter_music') || 'https://drive.google.com/file/d/1iGSMEvAj4w3I2VtALzP1YntIPWn8g_aM/view?usp=drive_link');
+            const [galleryBgMusic, setGalleryBgMusic] = useState(() => localStorage.getItem('chuti_gallery_music') || 'https://drive.google.com/file/d/1pI-S1Uvq_99Ard6RsY_2VubW9jCXUfFT/view?usp=drive_link');
+            
+            // Updated User Playlist with your 4 direct Drive Links
+            const [userPlaylist, setUserPlaylist] = useState(() => {
+                const saved = localStorage.getItem('chuti_user_playlist');
+                return saved ? JSON.parse(saved) : [
+                    { id: 1, title: 'Letter Love Theme 📜❤️', artist: 'Ravindu & Himaya 🌻', audioUrl: 'https://drive.google.com/file/d/1iGSMEvAj4w3I2VtALzP1YntIPWn8g_aM/view?usp=drive_link' },
+                    { id: 2, title: 'When You Miss Me Track 🥺', artist: 'Ravindu & Himaya 🌻', audioUrl: 'https://drive.google.com/file/d/1r7V4MhRLVA3rtqBUpVcoqAUg6wgBAHKB/view?usp=drive_link' },
+                    { id: 3, title: 'Gallery Background Melody 🖼️', artist: 'Ravindu & Himaya 🌻', audioUrl: 'https://drive.google.com/file/d/1pI-S1Uvq_99Ard6RsY_2VubW9jCXUfFT/view?usp=drive_link' },
+                    { id: 4, title: 'Comforting Sad Moments Track 🌧️', artist: 'Ravindu & Himaya 🌻', audioUrl: 'https://drive.google.com/file/d/1vDaNiPVsto2zTKR6YO6HwGWmq4fRgriC/view?usp=drive_link' }
+                ];
+            });
+
             // Handle Welcome Button Click to unlock Browser Auto-play Policy
             const handleEnterSite = () => {
                 setHasEnteredSite(true);
                 setHasUserInteracted(true);
             };
 
+            // Instant auto-play trigger for Gallery Audio when tab is activated
             useEffect(() => {
-                if (activeTab === 'gallery' && galleryAudioRef.current && hasUserInteracted) {
-                    galleryAudioRef.current.play().catch(e => console.log("Gallery audio play", e));
+                if (activeTab === 'gallery' && galleryAudioRef.current) {
+                    galleryAudioRef.current.play().catch(e => console.log("Gallery audio play auto-triggered", e));
                 }
             }, [activeTab, hasUserInteracted]);
-
-            // Music states with exact drive links
-            const [letterBgMusic, setLetterBgMusic] = useState(() => localStorage.getItem('chuti_letter_music') || 'https://drive.google.com/file/d/1iGSMEvAj4w3I2VtALzP1YntIPWn8g_aM/view?usp=drive_link');
-            const [galleryBgMusic, setGalleryBgMusic] = useState(() => localStorage.getItem('chuti_gallery_music') || 'https://drive.google.com/file/d/1pI-S1Uvq_99Ard6RsY_2VubW9jCXUfFT/view?usp=drive_link');
-            
-            const [userPlaylist, setUserPlaylist] = useState(() => {
-                const saved = localStorage.getItem('chuti_user_playlist');
-                return saved ? JSON.parse(saved) : [
-                    { id: 1, title: 'Letter Song Track', artist: 'Ravindu & Himaya 🌻', audioUrl: 'https://drive.google.com/file/d/1iGSMEvAj4w3I2VtALzP1YntIPWn8g_aM/view?usp=drive_link' },
-                    { id: 2, title: 'Gallery Background Tune', artist: 'Ravindu & Himaya 🌻', audioUrl: 'https://drive.google.com/file/d/1pI-S1Uvq_99Ard6RsY_2VubW9jCXUfFT/view?usp=drive_link' }
-                ];
-            });
 
             // Open When Envelopes State with final user media
             const [openWhenCards, setOpenWhenCards] = useState(() => {
@@ -570,8 +574,8 @@
                                     <p className="text-amber-200 text-xs">52 Permanent Sunflower Memories of Chuti & Ravindu 🌻</p>
                                 </div>
 
-                                <div className="w-full md:w-auto bg-amber-950/90 border border-yellow-500/30 p-3 rounded-2xl space-y-2">
-                                    <span className="text-xs font-bold text-yellow-400 block">🎵 Gallery Background Music</span>
+                                <div className="w-full md:w-auto bg-amber-950/90 border border-yellow-500/30 p-3 rounded-2xl space-y-2 shadow-lg">
+                                    <span className="text-xs font-bold text-yellow-400 block">🎵 Playing Gallery Music</span>
                                     {galleryBgMusic && (
                                         <audio 
                                             ref={galleryAudioRef}
@@ -605,113 +609,114 @@
                         <div className="space-y-6 animate-fadeIn">
                             <div className="bg-amber-900/60 p-6 rounded-3xl border border-yellow-500/30">
                                 <h2 className="text-2xl font-bold text-white">"Open When..." Envelopes 💌</h2>
-                                <p className="text-amber-200 text-xs">Tap an envelope to open your message, photos, and music</p>
+                                <p className="text-amber-200 text-xs">Special messages, photos & audio/video clips for Chuti 🌻</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {openWhenCards.map(card => (
+                                {openWhenCards.map((card) => (
                                     <div 
-                                        key={card.id} 
-                                        className="bg-amber-950/80 border border-yellow-500/30 p-6 rounded-3xl space-y-4 hover:border-yellow-400 transition-all shadow-xl"
+                                        key={card.id}
+                                        className="bg-amber-900/50 border border-yellow-500/30 p-6 rounded-3xl space-y-4 hover:border-yellow-400 transition-all flex flex-col justify-between"
                                     >
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs text-yellow-400 font-bold bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">
-                                                Envelope #{card.id} 🌻
-                                            </span>
-                                        </div>
-
-                                        <div>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs font-bold text-yellow-400 bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">
+                                                    Envelope #{card.id} 🌻
+                                                </span>
+                                                <span className="text-xl">💌</span>
+                                            </div>
                                             <h3 className="text-lg font-bold text-white">{card.title}</h3>
-                                            <p className="text-amber-300/80 text-xs pt-1">{card.subTitle}</p>
+                                            <p className="text-yellow-400 font-semibold text-xs">{card.subTitle}</p>
+                                            <p className="text-amber-200/90 text-xs bg-amber-950/70 p-3 rounded-xl border border-amber-800/80 italic">
+                                                "{card.text}"
+                                            </p>
                                         </div>
 
                                         <button
                                             onClick={() => setSelectedEnvelope(card)}
-                                            className="w-full py-2.5 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-extrabold text-xs rounded-xl shadow-md transition-all"
+                                            className="w-full py-2.5 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"
                                         >
                                             Open Envelope 💌
                                         </button>
                                     </div>
                                 ))}
                             </div>
+                        </div>
+                    )}
 
-                            {/* ENVELOPE OPEN MODAL POPUP */}
-                            {selectedEnvelope && (
-                                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-                                    <div className="bg-amber-950 border border-yellow-500/50 p-6 rounded-3xl max-w-lg w-full space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
-                                        <div className="flex justify-between items-center border-b border-amber-900 pb-3">
-                                            <h3 className="text-lg font-bold text-white">{selectedEnvelope.title}</h3>
-                                            <button 
-                                                onClick={() => setSelectedEnvelope(null)}
-                                                className="text-amber-400 font-bold text-sm bg-amber-900/80 px-3 py-1 rounded-full"
-                                            >
-                                                ✕ Close
-                                            </button>
-                                        </div>
+                    {/* ENVELOPE MODAL POPUP */}
+                    {selectedEnvelope && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+                            <div className="bg-amber-950 border-2 border-yellow-500/60 p-6 md:p-8 rounded-3xl max-w-lg w-full space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                                <button 
+                                    onClick={() => setSelectedEnvelope(null)}
+                                    className="absolute top-4 right-4 text-yellow-400 hover:text-white font-black text-lg bg-amber-900/80 px-3 py-1 rounded-full border border-yellow-500/30"
+                                >
+                                    ✕
+                                </button>
 
-                                        <p className="text-amber-100 text-sm leading-relaxed bg-amber-900/50 p-4 rounded-2xl border border-yellow-500/20">
-                                            {selectedEnvelope.text}
-                                        </p>
-
-                                        {selectedEnvelope.photo && (
-                                            <div className="rounded-2xl overflow-hidden border border-yellow-500/30">
-                                                <img 
-                                                    src={getDriveDirectUrl(selectedEnvelope.photo)} 
-                                                    alt="Card Attach" 
-                                                    className="w-full h-60 object-cover"
-                                                />
-                                            </div>
-                                        )}
-
-                                        {selectedEnvelope.audio && (
-                                            <div className="bg-amber-900/80 p-4 rounded-2xl border border-yellow-500/30 space-y-2">
-                                                <span className="text-xs text-yellow-400 font-bold block">🎵 Playing Voice Note / Music</span>
-                                                <iframe 
-                                                    src={getDriveStreamUrl(selectedEnvelope.audio)} 
-                                                    className="w-full h-20 rounded-xl bg-amber-950 border border-yellow-500/20"
-                                                    allow="autoplay *; encrypted-media *"
-                                                />
-                                            </div>
-                                        )}
-
-                                        {selectedEnvelope.video && (
-                                            <div className="bg-amber-900/80 p-4 rounded-2xl border border-yellow-500/30 space-y-2">
-                                                <span className="text-xs text-yellow-400 font-bold block">🎥 Birthday Video Message</span>
-                                                <iframe 
-                                                    src={getDriveStreamUrl(selectedEnvelope.video)} 
-                                                    className="w-full h-64 rounded-xl bg-black border border-yellow-500/20"
-                                                    allow="autoplay *; encrypted-media *"
-                                                    allowFullScreen
-                                                />
-                                            </div>
-                                        )}
-
-                                        {selectedEnvelope.videos && (
-                                            <div className="bg-amber-900/80 p-4 rounded-2xl border border-yellow-500/30 space-y-4">
-                                                <span className="text-xs text-yellow-400 font-bold block">🎥 Sweet Dreams Video Clips</span>
-                                                {selectedEnvelope.videos.map((vUrl, vIdx) => (
-                                                    <div key={vIdx} className="space-y-1">
-                                                        <span className="text-[10px] text-amber-200 font-bold">Video Clip #{vIdx + 1}</span>
-                                                        <iframe 
-                                                            src={getDriveStreamUrl(vUrl)} 
-                                                            className="w-full h-56 rounded-xl bg-black border border-yellow-500/20"
-                                                            allow="autoplay *; encrypted-media *"
-                                                            allowFullScreen
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        <button 
-                                            onClick={() => setSelectedEnvelope(null)}
-                                            className="w-full py-3 bg-yellow-500 text-slate-950 font-extrabold text-xs rounded-2xl shadow-lg hover:bg-yellow-400"
-                                        >
-                                            Close Envelope 💌
-                                        </button>
-                                    </div>
+                                <div className="text-center space-y-1">
+                                    <span className="text-xs font-bold text-yellow-400 uppercase tracking-widest bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">
+                                        {selectedEnvelope.title}
+                                    </span>
+                                    <h3 className="text-xl font-bold text-white pt-2">{selectedEnvelope.subTitle}</h3>
                                 </div>
-                            )}
+
+                                <p className="text-amber-100 text-sm bg-amber-900/60 p-4 rounded-2xl border border-yellow-500/30 text-center font-medium leading-relaxed">
+                                    "{selectedEnvelope.text}"
+                                </p>
+
+                                {/* Photo Attachment */}
+                                {selectedEnvelope.photo && (
+                                    <div className="rounded-2xl overflow-hidden border border-yellow-500/40 max-h-64 bg-black">
+                                        <img 
+                                            src={getDriveDirectUrl(selectedEnvelope.photo)} 
+                                            alt={selectedEnvelope.title} 
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Single Video Stream Attachment */}
+                                {selectedEnvelope.video && (
+                                    <div className="rounded-2xl overflow-hidden border border-yellow-500/40 bg-black aspect-video">
+                                        <iframe 
+                                            src={getDriveStreamUrl(selectedEnvelope.video)} 
+                                            className="w-full h-full border-0" 
+                                            allow="autoplay"
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Multiple Videos (Sweet Dreams) */}
+                                {selectedEnvelope.videos && (
+                                    <div className="space-y-3">
+                                        <span className="text-xs font-bold text-yellow-400 block">🌙 Sweet Dreams Videos:</span>
+                                        {selectedEnvelope.videos.map((vidUrl, vIdx) => (
+                                            <div key={vIdx} className="rounded-2xl overflow-hidden border border-yellow-500/30 bg-black aspect-video">
+                                                <iframe 
+                                                    src={getDriveStreamUrl(vidUrl)} 
+                                                    className="w-full h-full border-0" 
+                                                    allow="autoplay"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Audio Stream Attachment */}
+                                {selectedEnvelope.audio && (
+                                    <div className="bg-amber-900/90 border border-yellow-500/30 p-4 rounded-2xl space-y-2">
+                                        <span className="text-xs font-bold text-yellow-400 block">🎵 Special Audio Message</span>
+                                        <audio 
+                                            controls 
+                                            autoPlay 
+                                            src={getDriveDirectUrl(selectedEnvelope.audio)} 
+                                            className="w-full h-8" 
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
 
@@ -723,14 +728,14 @@
                                     Interactive Love Game 🎮
                                 </span>
                                 <h2 className="text-2xl font-bold text-white">How Well Do You Know Our Love? 💖</h2>
-                                <p className="text-amber-200 text-xs">Answer 5 cute questions for Chuti!</p>
+                                <p className="text-amber-200 text-xs">Answer 5 cute questions for Ravindu!</p>
                             </div>
 
                             {!quizFinished ? (
                                 <div className="bg-amber-950/90 border border-yellow-500/40 p-6 md:p-8 rounded-3xl space-y-6 shadow-2xl">
-                                    <div className="flex justify-between items-center border-b border-amber-900 pb-3">
-                                        <span className="text-xs font-bold text-yellow-400">Question {currentQuizIdx + 1} of 5</span>
-                                        <span className="text-xs text-amber-200 font-bold">Score: {quizScore} 🌻</span>
+                                    <div className="flex justify-between items-center text-xs font-bold text-yellow-400">
+                                        <span>Question {currentQuizIdx + 1} of {LOVE_QUIZ_QUESTIONS.length}</span>
+                                        <span>Score: {quizScore} 🌻</span>
                                     </div>
 
                                     <h3 className="text-lg md:text-xl font-extrabold text-white">
@@ -742,7 +747,7 @@
                                             <button
                                                 key={oIdx}
                                                 onClick={() => handleQuizSelect(currentQuizIdx, oIdx)}
-                                                className="w-full text-left p-4 rounded-2xl bg-amber-900/50 hover:bg-yellow-500 hover:text-slate-950 text-amber-100 font-bold text-sm border border-yellow-500/20 transition-all duration-300"
+                                                className="w-full text-left p-4 rounded-2xl bg-amber-900/60 hover:bg-yellow-500 hover:text-slate-950 border border-yellow-500/30 font-semibold text-sm transition-all"
                                             >
                                                 {opt}
                                             </button>
@@ -750,20 +755,22 @@
                                     </div>
                                 </div>
                             ) : (
-                                <div className="bg-amber-950/90 border border-yellow-500/40 p-8 rounded-3xl text-center space-y-6 shadow-2xl">
-                                    <div className="text-6xl animate-bounce">🌻</div>
-                                    <h3 className="text-3xl font-black text-white">You Completed the Love Quiz! 🥳💖</h3>
-                                    <p className="text-yellow-400 font-extrabold text-xl">Score: {quizScore} / 5 Correct!</p>
-                                    <p className="text-amber-200 text-sm max-w-md mx-auto leading-relaxed">
-                                        No matter what score, Ravindu loves you 1000% forever and ever, my Sunflower! 🌻✨
+                                <div className="bg-amber-950/90 border border-yellow-500/40 p-8 rounded-3xl text-center space-y-4 shadow-2xl">
+                                    <div className="text-5xl">🥳 🌻</div>
+                                    <h3 className="text-2xl font-bold text-white">Love Quiz Completed!</h3>
+                                    <p className="text-yellow-400 font-extrabold text-lg">
+                                        You scored {quizScore} out of {LOVE_QUIZ_QUESTIONS.length}! 🎉
                                     </p>
-                                    <button
+                                    <p className="text-amber-200 text-xs max-w-sm mx-auto leading-relaxed">
+                                        No matter the score, Ravindu's love for Chuti is 100% infinite forever! 💖
+                                    </p>
+                                    <button 
                                         onClick={() => {
                                             setCurrentQuizIdx(0);
                                             setQuizScore(0);
                                             setQuizFinished(false);
                                         }}
-                                        className="px-6 py-3 bg-yellow-500 text-slate-950 font-bold text-xs rounded-2xl hover:bg-yellow-400"
+                                        className="px-6 py-2.5 bg-yellow-500 text-slate-950 font-bold text-xs rounded-xl hover:bg-yellow-400"
                                     >
                                         Play Again 🔄
                                     </button>
@@ -772,22 +779,26 @@
                         </div>
                     )}
 
-                    {/* TAB 6: PLAYLIST */}
+                    {/* TAB 6: PLAYLIST & VOICE NOTES */}
                     {activeTab === 'music' && (
-                        <div className="bg-amber-900/60 p-6 rounded-3xl border border-yellow-500/30 space-y-4 animate-fadeIn">
-                            <div>
-                                <h2 className="text-xl font-bold text-white">Music & Voice Notes Player 🎧</h2>
-                                <p className="text-xs text-yellow-300">Dedicated tracks for Chuti & Ravindu</p>
+                        <div className="space-y-6 animate-fadeIn">
+                            <div className="bg-amber-900/60 p-6 rounded-3xl border border-yellow-500/30">
+                                <h2 className="text-2xl font-bold text-white">Chuti & Ravindu's Romantic Playlist 🎧</h2>
+                                <p className="text-amber-200 text-xs">Special tracks & voice notes recorded for you 🌻</p>
                             </div>
 
                             <div className="space-y-3">
-                                {userPlaylist.map(track => (
-                                    <div key={track.id} className="bg-amber-950/80 p-4 rounded-2xl border border-yellow-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                        <div>
+                                {userPlaylist.map((track) => (
+                                    <div key={track.id} className="bg-amber-950/90 border border-yellow-500/30 p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg">
+                                        <div className="space-y-1">
                                             <h4 className="text-sm font-bold text-white">{track.title}</h4>
-                                            <span className="text-xs text-yellow-400/80">{track.artist}</span>
+                                            <p className="text-xs text-yellow-400/80">{track.artist}</p>
                                         </div>
-                                        <audio controls src={getDriveDirectUrl(track.audioUrl)} className="w-full sm:w-64 h-8" />
+                                        <audio 
+                                            controls 
+                                            src={getDriveDirectUrl(track.audioUrl)} 
+                                            className="w-full md:w-64 h-8" 
+                                        />
                                     </div>
                                 ))}
                             </div>
